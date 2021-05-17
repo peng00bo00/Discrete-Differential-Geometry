@@ -1,2 +1,2 @@
 # CS-15-458-858-Discrete-Differential-Geometry
-DDG course from CMU
+[CS 15-458/858: Discrete Differential Geometry](https://brickisland.net/DDGSpring2021/) course from CMU
