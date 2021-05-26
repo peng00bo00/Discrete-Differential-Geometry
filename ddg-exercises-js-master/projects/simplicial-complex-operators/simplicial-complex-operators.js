@@ -282,31 +282,31 @@ class SimplicialComplexOperators {
          */
         boundary(subset) {
                 // TODO
-		let myBoundary = new MeshSubset;
+		let bd = new MeshSubset;
 
 		if (subset.faces.size > 0) {
 			let FEmatrix = this.A1.transpose();
-			let Fvector = this.buildFaceVector(subset);
-			let adjEdges = FEmatrix.timesDense(Fvector);
+			let F = this.buildFaceVector(subset);
+			let adjEdges = FEmatrix.timesDense(F);
 
 			for (let i = 0; i < adjEdges.nRows(); i++) {
 				if (adjEdges.get(i, 0) == 1) {
-					myBoundary.addEdge(i);
+					bd.addEdge(i);
 				}
 			}
 
 		} else if (subset.edges.size > 0) {
 			let EVmatrix = this.A0.transpose();
-			let Evector = this.buildEdgeVector(subset);
-			let adjVertices = EVmatrix.timesDense(Evector);
+			let E = this.buildEdgeVector(subset);
+			let adjVertices = EVmatrix.timesDense(E);
 
 			for (let i = 0; i < adjVertices.nRows(); i++) {
 				if (adjVertices.get(i, 0) == 1) {
-					myBoundary.addVertex(i);
+					bd.addVertex(i);
 				}
 			}
 		}
 
-		return this.closure(myBoundary);
+		return this.closure(bd);
         }
 }
