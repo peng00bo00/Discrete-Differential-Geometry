@@ -15,8 +15,20 @@ class DEC {
 	 */
 	static buildHodgeStar0Form(geometry, vertexIndex) {
 		// TODO
+		let vertices = geometry.mesh.vertices;
+		let V = vertices.length;
+		let T = new Triplet(V, V);
+		for (let v of vertices) {
+			let i = vertexIndex[v];
+			let area = geometry.barycentricDualArea(v);
 
-		return SparseMatrix.identity(1, 1); // placeholder
+			T.addEntry(area, i, i);
+		}
+
+		let hodgeStar = SparseMatrix.fromTriplet(T);
+		return hodgeStar; // placeholder
+
+		// return SparseMatrix.identity(1, 1); // placeholder
 	}
 
 	/**
@@ -28,8 +40,20 @@ class DEC {
 	 */
 	static buildHodgeStar1Form(geometry, edgeIndex) {
 		// TODO
+		let edges = geometry.mesh.edges;
+		let E = edges.length;
+		let T = new Triplet(E, E);
+		for (let e of edges) {
+			let i = edgeIndex[e];
+			let w = (geometry.cotan(e.halfedge) + geometry.cotan(e.halfedge.twin)) / 2;
 
-		return SparseMatrix.identity(1, 1); // placeholder
+			T.addEntry(w, i, i);
+		}
+
+		let hodgeStar = SparseMatrix.fromTriplet(T);
+		return hodgeStar; // placeholder
+
+		// return SparseMatrix.identity(1, 1); // placeholder
 	}
 
 	/**
@@ -42,8 +66,20 @@ class DEC {
 	 */
 	static buildHodgeStar2Form(geometry, faceIndex) {
 		// TODO
+		let faces = geometry.mesh.faces;
+		let F = faces.length;
+		let T = new Triplet(F, F);
+		for (let f of faces) {
+			let i = faceIndex[f];
+			let area = geometry.area(f);
 
-		return SparseMatrix.identity(1, 1); // placeholder
+			T.addEntry(1 / area, i, i);
+		}
+
+		let hodgeStar = SparseMatrix.fromTriplet(T);
+		return hodgeStar;
+
+		// return SparseMatrix.identity(1, 1); // placeholder
 	}
 
 	/**
@@ -56,8 +92,23 @@ class DEC {
 	 */
 	static buildExteriorDerivative0Form(geometry, edgeIndex, vertexIndex) {
 		// TODO
+		let edges = geometry.mesh.edges;
+		let vertices = geometry.mesh.vertices;
+		let E = edges.length;
+		let V = vertices.length;
+		let T = new Triplet(E, V);
+		for (let e of edges) {
+			let i = edgeIndex[e];
+			let j = vertexIndex[e.halfedge.vertex];
+			let k = vertexIndex[e.halfedge.twin.vertex];
 
-		return SparseMatrix.identity(1, 1); // placeholder
+			T.addEntry(1, i, j);
+			T.addEntry(-1, i, k);
+		}
+
+		return SparseMatrix.fromTriplet(T);
+
+		// return SparseMatrix.identity(1, 1); // placeholder
 	}
 
 	/**
@@ -70,7 +121,24 @@ class DEC {
 	 */
 	static buildExteriorDerivative1Form(geometry, faceIndex, edgeIndex) {
 		// TODO
+		let faces = geometry.mesh.faces;
+		let edges = geometry.mesh.edges;
+		let F = faces.length;
+		let E = edges.length;
+		let T = new Triplet(F, E);
+		for (let f of faces) {
+			let i = faceIndex[f];
 
-		return SparseMatrix.identity(1, 1); // placeholder
+			for (let h of f.adjacentHalfedges()) {
+				let j = edgeIndex[h.edge];
+				let sign = h.edge.halfedge === h ? 1 : -1;
+
+				T.addEntry(sign, i, j);
+			}
+		}
+
+		return SparseMatrix.fromTriplet(T);
+
+		// return SparseMatrix.identity(1, 1); // placeholder
 	}
 }
