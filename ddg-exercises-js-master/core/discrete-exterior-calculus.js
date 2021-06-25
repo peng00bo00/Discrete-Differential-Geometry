@@ -102,8 +102,8 @@ class DEC {
 			let j = vertexIndex[e.halfedge.vertex];
 			let k = vertexIndex[e.halfedge.twin.vertex];
 
-			T.addEntry(1, i, j);
-			T.addEntry(-1, i, k);
+			T.addEntry(-1, i, j);
+			T.addEntry( 1, i, k);
 		}
 
 		return SparseMatrix.fromTriplet(T);
