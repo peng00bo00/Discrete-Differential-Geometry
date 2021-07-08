@@ -189,7 +189,15 @@ class Geometry {
 	angle(c) {
 		// TODO
 
-		return 0.0; // placeholder
+		let h = c.halfedge;
+		let v1 = this.vector(h.next.twin);
+		let v2 = this.vector(h.next.next);
+
+		let dot = v1.dot(v2);
+		let cos = dot / (v1.norm() * v2.norm());
+		let rad = Math.acos(cos);
+
+		return rad; // placeholder
 	}
 
 	/**
@@ -205,7 +213,6 @@ class Geometry {
 		let u = this.vector(h.prev);
 		let v = this.vector(h.next).negated();
 
-		// return 0.0; // placeholder
 		return u.dot(v) / u.cross(v).norm();
 	}
 
@@ -219,7 +226,19 @@ class Geometry {
 	dihedralAngle(h) {
 		// TODO
 
-		return 0.0; // placeholder
+		let f1 = h.face;
+		let f2 = h.twin.face;
+
+		let N1 = this.faceNormal(f1);
+		let N2 = this.faceNormal(f2);
+		
+		let edge = this.vector(h);
+		let cross = N1.cross(N2);
+
+		let x = edge.dot(cross) / (edge.norm());
+		let y = N1.dot(N2);
+
+		return Math.atan2(x, y); // placeholder
 	}
 
 	/**
@@ -249,8 +268,21 @@ class Geometry {
 	 */
 	circumcentricDualArea(v) {
 		// TODO
+		let area = 0.0;
 
-		return 0.0; // placeholder
+		for (let c of v.adjacentCorners()) {
+			let h = c.halfedge;
+			let h1 = h.next;
+			let h2 = h.next.next;
+
+			let v1 = this.vector(h1);
+			let v2 = this.vector(h2);
+
+			area += v1.norm2() * this.cotan(h1);
+			area += v2.norm2() * this.cotan(h2);
+		}
+
+		return area / 8; // placeholder
 	}
 
 	/**
@@ -280,8 +312,17 @@ class Geometry {
 	 */
 	vertexNormalAreaWeighted(v) {
 		// TODO
+		let n = new Vector();
+		for (let f of v.adjacentFaces()) {
+			let area = this.area(f);
+			let normal = this.faceNormal(f).times(area);
 
-		return new Vector(); // placeholder
+			n.incrementBy(normal);
+		}
+
+		n.normalize();
+
+		return n;
 	}
 
 	/**
@@ -292,8 +333,18 @@ class Geometry {
 	 */
 	vertexNormalAngleWeighted(v) {
 		// TODO
+		let n = new Vector();
+		for (let c of v.adjacentCorners()) {
+			let f = c.face;
+			let angle = this.angle(c);
+			let normal = this.faceNormal(f).times(angle);
 
-		return new Vector(); // placeholder
+			n.incrementBy(normal);
+		}
+
+		n.normalize();
+
+		return n;
 	}
 
 	/**
@@ -304,8 +355,18 @@ class Geometry {
 	 */
 	vertexNormalGaussCurvature(v) {
 		// TODO
+		let K = new Vector();
 
-		return new Vector(); // placeholder
+		for (let h of v.adjacentHalfedges()) {
+			let v = this.vector(h);
+			let weight = 0.5 * this.dihedralAngle(h) / this.length(h.edge);
+
+			K.incrementBy(v.times(weight));
+		}
+
+		K.normalize();
+
+		return K; // placeholder
 	}
 
 	/**
@@ -316,8 +377,18 @@ class Geometry {
 	 */
 	vertexNormalMeanCurvature(v) {
 		// TODO
+		let H = new Vector();
 
-		return new Vector(); // placeholder
+		for (let h of v.adjacentHalfedges()) {
+			let v = this.vector(h);
+			let weight = 0.5 * (this.cotan(h) + this.cotan(h.twin));
+
+			H.incrementBy(v.times(weight));
+		}
+
+		H.normalize();
+
+		return H; // placeholder
 	}
 
 	/**
@@ -328,8 +399,24 @@ class Geometry {
 	 */
 	vertexNormalSphereInscribed(v) {
 		// TODO
+		let n = new Vector();
+		for (let c of v.adjacentCorners()) {
+			let h = c.halfedge;
+			let h1 = h.next.twin;
+			let h2 = h.next.next;
 
-		return new Vector(); // placeholder
+			let v1 = this.vector(h1);
+			let v2 = this.vector(h2);
+
+			let cross = v2.cross(v1);
+			let normal = cross.over(v1.norm2() * v2.norm2());
+
+			n.incrementBy(normal);
+		}
+
+		n.normalize();
+
+		return n;
 	}
 
 	/**
@@ -341,8 +428,13 @@ class Geometry {
 	 */
 	angleDefect(v) {
 		// TODO
+		let angle = 2 * Math.PI;
 
-		return 0.0; // placeholder
+		for (let c of v.adjacentCorners()) {
+			angle -= this.angle(c);
+		}
+
+		return angle; // placeholder
 	}
 
 	/**
@@ -363,8 +455,14 @@ class Geometry {
 	 */
 	scalarMeanCurvature(v) {
 		// TODO
+		let H = 0.0;
 
-		return 0.0; // placeholder
+		for (let h of v.adjacentHalfedges()) {
+			let v = this.vector(h);
+			H += v.norm() * this.dihedralAngle(h);
+		}
+
+		return 0.5*H; // placeholder
 	}
 
 	/**
@@ -373,9 +471,12 @@ class Geometry {
 	 * @returns {number}
 	 */
 	totalAngleDefect() {
-		// TODO
+		let totalDefect = 0.0;
+		for (let v of this.mesh.vertices) {
+			totalDefect += this.angleDefect(v);
+		}
 
-		return 0.0; // placeholder
+		return totalDefect;
 	}
 
 	/**
@@ -386,8 +487,13 @@ class Geometry {
 	 */
 	principalCurvatures(v) {
 		// TODO
+		let A = this.circumcentricDualArea(v);
+		let H = this.scalarMeanCurvature(v) / A;
+		let K = this.scalarGaussCurvature(v) / A;
 
-		return [0.0, 0.0]; // placeholder
+		let delta = Math.sqrt(H * H - K);
+
+		return [H-delta, H+delta]; // placeholder
 	}
 
 	/**
