@@ -506,8 +506,25 @@ class Geometry {
 	 */
 	laplaceMatrix(vertexIndex) {
 		// TODO
+		let V = this.mesh.vertices.length;
+		let L = new Triplet(V, V);
 
-		return SparseMatrix.identity(1, 1); // placeholder
+		for (let v of this.mesh.vertices) {
+			let i = vertexIndex[v];
+			let sum = 1e-8;
+
+			for (let h of v.adjacentHalfedges()) {
+				let j = vertexIndex[h.twin.vertex];
+				let cot = 0.5 * (this.cotan(h) + this.cotan(h.twin));
+				sum += cot;
+
+				L.addEntry(-cot, i, j)
+			}
+
+			L.addEntry(sum, i, i);
+		}
+
+		return SparseMatrix.fromTriplet(L); // placeholder
 	}
 
 	/**
@@ -519,8 +536,16 @@ class Geometry {
 	 */
 	massMatrix(vertexIndex) {
 		// TODO
+		let V = this.mesh.vertices.length;
+		let M = new Triplet(V, V);
 
-		return SparseMatrix.identity(1, 1); // placeholder
+		for (let v of this.mesh.vertices) {
+			let i = vertexIndex[v];
+
+			M.addEntry(this.barycentricDualArea(v), i, i);
+		}
+
+		return SparseMatrix.fromTriplet(M); // placeholder
 	}
 
 	/**
