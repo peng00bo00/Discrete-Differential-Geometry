@@ -428,7 +428,7 @@ class Geometry {
 	 */
 	angleDefect(v) {
 		// TODO
-		let angle = 2 * Math.PI;
+		let angle = v.onBoundary() ?  Math.PI : 2 * Math.PI;
 
 		for (let c of v.adjacentCorners()) {
 			angle -= this.angle(c);
@@ -558,8 +558,25 @@ class Geometry {
 	 */
 	complexLaplaceMatrix(vertexIndex) {
 		// TODO
+		let V = this.mesh.vertices.length;
+		let L = new ComplexTriplet(V, V);
 
-		return ComplexSparseMatrix.identity(1, 1); // placeholder
+		for (let v of this.mesh.vertices) {
+			let i = vertexIndex[v];
+			let sum = 1e-8;
+
+			for (let h of v.adjacentHalfedges()) {
+				let j = vertexIndex[h.twin.vertex];
+				let cot = 0.5 * (this.cotan(h) + this.cotan(h.twin));
+				sum += cot;
+
+				L.addEntry(new Complex(-cot, 0.0), i, j)
+			}
+
+			L.addEntry(new Complex(sum, 0.0), i, i);
+		}
+
+		return ComplexSparseMatrix.fromTriplet(L); // placeholder
 	}
 }
 

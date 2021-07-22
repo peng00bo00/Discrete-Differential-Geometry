@@ -22,8 +22,29 @@ class SpectralConformalParameterization {
 	 */
 	buildConformalEnergy() {
 		// TODO
+		let V = this.geometry.mesh.vertices.length;
 
-		return ComplexSparseMatrix.identity(1, 1); // placeholder
+		// ED
+		let ED = this.geometry.complexLaplaceMatrix(this.vertexIndex);
+		ED = ED.timesComplex(new Complex(0.5, 0.));
+
+		// A
+		let T = new ComplexTriplet(V, V);
+		for (let f of this.geometry.mesh.boundaries) {
+			for (let h of f.adjacentHalfedges()) {
+				if (h.onBoundary) {
+					let i = this.vertexIndex[h.vertex];
+					let j = this.vertexIndex[h.twin.vertex];
+	
+					T.addEntry(new Complex(0., 0.25), i, j);
+					T.addEntry(new Complex(0.,-0.25), j, i);
+				}
+			}
+		}
+
+		let A = ComplexSparseMatrix.fromTriplet(T);
+
+		return ED.minus(A);
 	}
 
 	/**
