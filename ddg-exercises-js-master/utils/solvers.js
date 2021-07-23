@@ -16,7 +16,15 @@ class Solvers {
 	static residual(A, x) {
 		// TODO
 
-		return 0.0; // placeholder
+		// normalize x
+		let y = x.timesComplex(new Complex(1.0/x.norm(2), 0.0));
+
+		let r1 = A.timesDense(y);
+		let r2 = y.timesDense(y.transpose().conjugate().timesDense(r1));
+
+		let r = r1.minus(r2);
+
+		return r.norm(2);
 	}
 
 	/**
@@ -29,9 +37,27 @@ class Solvers {
 	 * smallest eigenvalue λ) of A.
 	 */
 	static solveInversePowerMethod(A) {
-		// TODO
 
-		return ComplexDenseMatrix.zeros(1, 1); // placeholder
+		// TODO
+		let N = A.nRows();
+		let x = ComplexDenseMatrix.random(N, 1);
+
+		// LU solver
+		let lu = A.lu();
+
+		while (this.residual(A, x) > 1e-10) {
+
+			// inverse power iteration
+			x = lu.solveSquare(x);
+
+			// center x around the origin
+			x.decrementBy(ComplexDenseMatrix.constant(x.sum().overReal(N), N, 1));
+
+			// normalize x
+			x.scaleBy(new Complex(1.0/x.norm(2), 0.0));
+		}
+
+		return x; // placeholder
 	}
 
 	/**
