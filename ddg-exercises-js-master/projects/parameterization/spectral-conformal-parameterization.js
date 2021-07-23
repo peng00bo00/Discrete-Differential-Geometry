@@ -57,14 +57,14 @@ class SpectralConformalParameterization {
 		let vertices = this.geometry.mesh.vertices;
 		let flattening = this.geometry.positions; // placeholder
 
-		let xeig = Solvers.solveInversePowerMethod(this.buildConformalEnergy());
+		let x = Solvers.solveInversePowerMethod(this.buildConformalEnergy());
 
 		for (let v of vertices) {
 			let i = this.vertexIndex[v];
 			let p = flattening[v];
 
-			p.x = xeig.get(i, 0).re;
-			p.y = xeig.get(i, 0).im;
+			p.x = x.get(i, 0).re;
+			p.y = x.get(i, 0).im;
 			p.z = 0.;
 		}
 
