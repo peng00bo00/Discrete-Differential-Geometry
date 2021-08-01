@@ -136,7 +136,7 @@ class HeatMethod {
 		let X = this.computeVectorField(u);
 
 		// Solve the Poisson equation => phi
-		// note that our laplacian is positive semidefinite, it should be -L
+		// note that our laplacian is positive semidefinite, the equation should be: -L phi = div X
 		let phi = Allt.solvePositiveDefinite(this.computeDivergence(X).timesReal(-1.));
 
 		// since φ is unique up to an additive constant, it should
