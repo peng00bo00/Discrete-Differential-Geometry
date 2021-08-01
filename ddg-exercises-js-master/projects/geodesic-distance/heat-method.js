@@ -57,7 +57,7 @@ class HeatMethod {
 			}
 
 			du = N.cross(du);
-			du.divideBy(Af);
+			du.divideBy(2.0*Af);
 
 			X[f] = du.unit();
 		}
@@ -76,21 +76,23 @@ class HeatMethod {
 	computeDivergence(X) {
 		// TODO
 		let vertices = this.geometry.mesh.vertices;
-		let div = DenseMatrix.zeros(vertices.length,1);
+		let div = DenseMatrix.zeros(vertices.length, 1);
 
 		for (let v of vertices) {
 			let i = this.vertexIndex[v];
 			let d = 0.0;
 			
 			for (let h of v.adjacentHalfedges()) {
-				let e = this.geometry.vector(h);
+				if (!h.onBoundary) {
+					let e = this.geometry.vector(h);
 
-				let Xj = X[h.face];
-				d += this.geometry.cotan(h) * Xj.dot(e);
-				
-				h = h.twin;
-				Xj = X[h.face];
-				d += this.geometry.cotan(h) * Xj.dot(e);
+					let Xj = X[h.face];
+					d += this.geometry.cotan(h) * Xj.dot(e);
+					
+					h = h.twin;
+					Xj = X[h.face];
+					d += this.geometry.cotan(h) * Xj.dot(e);
+				}
 			}
 			
 			div.set(0.5*d, i, 0);
@@ -136,8 +138,9 @@ class HeatMethod {
 		let X = this.computeVectorField(u);
 
 		// Solve the Poisson equation => phi
-		// note that our laplacian is positive semidefinite, the equation should be: -L phi = div X
-		let phi = Allt.solvePositiveDefinite(this.computeDivergence(X).timesReal(-1.));
+		// note that our laplacian is positive semidefinite, the equation should be: -L phi = div
+		let div = this.computeDivergence(X);
+		let phi = Allt.solvePositiveDefinite(div.negated());
 
 		// since φ is unique up to an additive constant, it should
 		// be shifted such that the smallest distance is zero
