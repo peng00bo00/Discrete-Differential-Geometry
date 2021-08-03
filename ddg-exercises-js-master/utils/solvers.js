@@ -42,13 +42,13 @@ class Solvers {
 		let N = A.nRows();
 		let x = ComplexDenseMatrix.random(N, 1);
 
-		// LU solver
-		let lu = A.lu();
+		// solve linear equation
+		let llt = A.chol();
 
 		while (this.residual(A, x) > 1e-10) {
 
 			// inverse power iteration
-			x = lu.solveSquare(x);
+			x = llt.solvePositiveDefinite(x);
 
 			// center x around the origin
 			x.decrementBy(ComplexDenseMatrix.constant(x.sum().overReal(N), N, 1));
