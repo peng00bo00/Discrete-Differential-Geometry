@@ -25,6 +25,24 @@ class TreeCotree {
 	 */
 	buildPrimalSpanningTree() {
 		// TODO
+		// initialize all vertices
+		for (let v of this.mesh.vertices) {
+			this.vertexParent[v] = v;
+		}
+
+		// build spanning tree
+		let root = this.mesh.vertices[0];
+		let queue = [root];
+		while (queue.length !== 0) {
+			let u = queue.shift();
+
+			for (let v of u.adjacentVertices()) {
+				if (this.vertexParent[v] === v && v !== root) {
+					this.vertexParent[v] = u;
+					queue.push(v);
+				}
+			}
+		}
 	}
 
 	/**
@@ -36,8 +54,10 @@ class TreeCotree {
 	 */
 	inPrimalSpanningTree(h) {
 		// TODO
+		let u = h.vertex;
+		let v = h.twin.vertex;
 
-		return false; // placeholder
+		return this.vertexParent[u] === v || this.vertexParent[v] === u;
 	}
 
 	/**
@@ -47,6 +67,28 @@ class TreeCotree {
 	 */
 	buildDualSpanningCotree() {
 		// TODO
+		// initialize all faces
+		for (let f of this.mesh.faces) {
+			this.faceParent[f] = f;
+		}
+
+		// build dual spanning tree
+		let root = this.mesh.faces[0];
+		let queue = [root];
+		while (queue.length !== 0) {
+			let f = queue.shift();
+
+			for (let h of f.adjacentHalfedges()) {
+				if (!this.inPrimalSpanningTree(h)) {
+					let g = h.twin.face;
+
+					if (this.faceParent[g] === g && g !== root) {
+						this.faceParent[g] = f;
+						queue.push(g);
+					}
+				}
+			}
+		}
 	}
 
 	/**
@@ -58,8 +100,10 @@ class TreeCotree {
 	 */
 	inDualSpanningTree(h) {
 		// TODO
+		let f = h.face;
+		let g = h.twin.face;
 
-		return false; // placeholder
+		return this.faceParent[f] === g || this.faceParent[g] === f;
 	}
 
 	/**
@@ -92,5 +136,41 @@ class TreeCotree {
 		this.buildDualSpanningCotree();
 
 		// TODO
+		for (let e of this.mesh.edges) {
+			let h = e.halfedge;
+
+			if (!this.inPrimalSpanningTree(h) && !this.inDualSpanningTree(h)) {
+				// trace faces back to root
+				let tempGenerator1 = [];
+				let f = h.face;
+				while (this.faceParent[f] !== f) {
+					let parent = this.faceParent[f];
+					tempGenerator1.push(this.sharedHalfedge(f, parent));
+					f = parent;
+				}
+
+				let tempGenerator2 = [];
+				f = h.twin.face;
+				while (this.faceParent[f] !== f) {
+					let parent = this.faceParent[f];
+					tempGenerator2.push(this.sharedHalfedge(f, parent));
+					f = parent;
+				}
+
+				// remove common halfedges
+				let m = tempGenerator1.length - 1;
+				let n = tempGenerator2.length - 1;
+				while (tempGenerator1[m] === tempGenerator2[n]) {
+					m--;
+					n--;
+				}
+
+				let generator = [h];
+				for (let i = 0; i <= m; i++) generator.push(tempGenerator1[i].twin);
+				for (let i = n; i >= 0; i--) generator.push(tempGenerator2[i]);
+
+				this.mesh.generators.push(generator);
+			}
+		}
 	}
 }

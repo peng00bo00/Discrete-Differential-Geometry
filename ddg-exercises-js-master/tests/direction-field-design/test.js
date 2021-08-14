@@ -130,8 +130,10 @@ describe("TrivialConnections", function() {
 		it("computes the harmonic component", function() {
 			let loadHarmonicComponent = function() {
 				let gamma = DenseMatrix.zeros(E, 1);
+				let deltaBeta = DenseMatrix.zeros(E, 1);
 
-				let e = 0;
+				let e1 = 0;
+				let e2 = 0;
 				let lines = solution.split("\n");
 				for (let line of lines) {
 					line = line.trim();
@@ -139,15 +141,20 @@ describe("TrivialConnections", function() {
 					let identifier = tokens[0].trim();
 
 					if (identifier === "gamma") {
-						gamma.set(parseFloat(tokens[1]), e, 0);
-						e++;
+						gamma.set(parseFloat(tokens[1]), e1, 0);
+						e1++;
+					} else if (identifier === "deltaBeta") {
+						deltaBeta.set(parseFloat(tokens[1]), e2, 0);
+						e2++;
 					}
 				}
 
-				return gamma;
+				return [gamma, deltaBeta];
 			}
 
-			let gamma_sol = loadHarmonicComponent();
+			let [gamma_sol, deltaBeta] = loadHarmonicComponent();
+			trivialConnections = new TrivialConnections(geometry);
+
 			gamma = trivialConnections.computeHarmonicComponent(deltaBeta);
 
 			chai.assert.strictEqual(gamma.minus(gamma_sol).norm() < 1e-6, true);
@@ -180,7 +187,7 @@ describe("TrivialConnections", function() {
 					} else if (identifier === "singularity") {
 						singularity[v] = parseFloat(tokens[1]);
 						v++;
-                                        }
+                    }
 
 				}
 
@@ -188,6 +195,7 @@ describe("TrivialConnections", function() {
 			}
 
 			let [phi_sol, singularity] = loadConnections();
+			trivialConnections = new TrivialConnections(geometry);
 			let phi = trivialConnections.computeConnections(singularity);//deltaBeta.plus(gamma);
 
 			chai.assert.strictEqual(phi.minus(phi_sol).norm() < 1e-6, true);
