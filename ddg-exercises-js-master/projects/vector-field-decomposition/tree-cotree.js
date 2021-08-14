@@ -33,7 +33,7 @@ class TreeCotree {
 		// build spanning tree
 		let root = this.mesh.vertices[0];
 		let queue = [root];
-		while (queue.length !== 0) {
+		while (queue.length > 0) {
 			let u = queue.shift();
 
 			for (let v of u.adjacentVertices()) {
@@ -75,7 +75,7 @@ class TreeCotree {
 		// build dual spanning tree
 		let root = this.mesh.faces[0];
 		let queue = [root];
-		while (queue.length !== 0) {
+		while (queue.length > 0) {
 			let f = queue.shift();
 
 			for (let h of f.adjacentHalfedges()) {
