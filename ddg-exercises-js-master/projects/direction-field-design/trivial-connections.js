@@ -184,8 +184,8 @@ class TrivialConnections {
 			}
 
 			// solve linear system
-			let qr = this.P.qr();
-			let z = qr.solve(rhs);
+			let lu = this.P.lu();
+			let z = lu.solveSquare(rhs);
 
 			// compute γ
 			for (let i = 0; i < N; i++) {
@@ -219,7 +219,7 @@ class TrivialConnections {
 
 		// extract harmonic component
 		let gamma = this.computeHarmonicComponent(deltaBeta);
-		
+
 		// φ = 𝛿β + γ
 		return deltaBeta.plus(gamma);
 	}

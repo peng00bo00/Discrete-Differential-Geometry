@@ -406,59 +406,59 @@ describe("VectorFieldDecomposition", function() {
 
 	describe("TreeCotree: buildGenerators", function() {
 		it("Has 2g generators", function() {
-                        let g = 1 - mesh.eulerCharacteristic() / 2;
+            let g = 1 - mesh.eulerCharacteristic() / 2;
 			let treeCotree = new TreeCotree(mesh);
-                        treeCotree.buildGenerators();
+            treeCotree.buildGenerators();
 			chai.assert.strictEqual(mesh.generators.length, 2 * g);
 		});
 	});
 
 	describe("HarmonicBases: buildClosedPrimalOneForm", function() {
 		it("Correct nonzero entries", function() {
-                        let edgeIndex = indexElements(mesh.edges);
-                        let generator = [];
-                        for (let i = 0; i < 5; i++) {
-                            generator.push(mesh.edges[i].halfedge);
-                        }
+            let edgeIndex = indexElements(mesh.edges);
+            let generator = [];
+            for (let i = 0; i < 5; i++) {
+                generator.push(mesh.edges[i].halfedge);
+            }
 
 			let harmonicBases = new HarmonicBases(geometry);
-                        let w = harmonicBases.buildClosedPrimalOneForm(generator, edgeIndex);
+            let w = harmonicBases.buildClosedPrimalOneForm(generator, edgeIndex);
 
-                        for (let e of mesh.edges) {
-                            let i = edgeIndex[e];
-                            if (i < 5) {
-                                chai.assert.notStrictEqual(w.get(i, 0), 0);
-                            } else {
-                                chai.assert.strictEqual(w.get(i, 0), 0);
-                            }
-                        }
+            for (let e of mesh.edges) {
+                let i = edgeIndex[e];
+                if (i < 5) {
+                    chai.assert.notStrictEqual(w.get(i, 0), 0);
+                } else {
+                    chai.assert.strictEqual(w.get(i, 0), 0);
+                }
+            }
 		});
 		it("Correct orientation", function() {
-                        let edgeIndex = indexElements(mesh.edges);
-                        let generator = [];
-                        for (let i = 0; i < 5; i++) {
-                            if (i % 2 == 0) {
-                                generator.push(mesh.edges[i].halfedge);
-                            } else {
-                                generator.push(mesh.edges[i].halfedge.twin);
-                            }
-                        }
+            let edgeIndex = indexElements(mesh.edges);
+			let generator = [];
+            for (let i = 0; i < 5; i++) {
+                if (i % 2 == 0) {
+                    generator.push(mesh.edges[i].halfedge);
+                } else {
+                    generator.push(mesh.edges[i].halfedge.twin);
+                }
+            }
 
 			let harmonicBases = new HarmonicBases(geometry);
-                        let w = harmonicBases.buildClosedPrimalOneForm(generator, edgeIndex);
+            let w = harmonicBases.buildClosedPrimalOneForm(generator, edgeIndex);
 
-                        for (let e of mesh.edges) {
-                            let i = edgeIndex[e];
-                            if (i < 5) {
-                                if (i % 2 == 0) {
-                                    chai.assert.strictEqual(w.get(i, 0), 1);
-                                } else {
-                                    chai.assert.strictEqual(w.get(i, 0), -1);
-                                }
-                            } else {
-                                chai.assert.strictEqual(w.get(i, 0), 0);
-                            }
-                        }
+            for (let e of mesh.edges) {
+                let i = edgeIndex[e];
+                if (i < 5) {
+                    if (i % 2 == 0) {
+                        chai.assert.strictEqual(w.get(i, 0), 1);
+                    } else {
+                        chai.assert.strictEqual(w.get(i, 0), -1);
+                    }
+                } else {
+                    chai.assert.strictEqual(w.get(i, 0), 0);
+                }
+            }
 		});
 	});
 
@@ -495,10 +495,10 @@ describe("VectorFieldDecomposition", function() {
 			let harmonicBases = new HarmonicBases(geometry);
 			let bases = harmonicBases.compute(hodgeDecomposition);
 
-                        for (let gamma of bases) {
-                            let dgamma = hodgeDecomposition.d1.timesDense(gamma);
-                            chai.assert.approximately(dgamma.norm(2), 0, 1e-4, 'gamma approximately closed')
-                        }
+            for (let gamma of bases) {
+                let dgamma = hodgeDecomposition.d1.timesDense(gamma);
+                chai.assert.approximately(dgamma.norm(2), 0, 1e-4, 'gamma approximately closed')
+            }
 
 			memoryManager.deleteExcept([]);
 		});
@@ -513,10 +513,10 @@ describe("VectorFieldDecomposition", function() {
 			let harmonicBases = new HarmonicBases(geometry);
 			let bases = harmonicBases.compute(hodgeDecomposition);
 
-                        for (let gamma of bases) {
-                            let dgamma = hodgeDecomposition.d0T.timesDense(hodgeDecomposition.hodge1.timesDense(gamma));
-                            chai.assert.approximately(dgamma.norm(2), 0, 1e-4, 'gamma approximately coclosed')
-                        }
+            for (let gamma of bases) {
+                let dgamma = hodgeDecomposition.d0T.timesDense(hodgeDecomposition.hodge1.timesDense(gamma));
+                chai.assert.approximately(dgamma.norm(2), 0, 1e-4, 'gamma approximately coclosed')
+            }
 
 			memoryManager.deleteExcept([]);
 		});
